@@ -1,0 +1,105 @@
+BASIC UDP
+
+SERVER
+
+import socket
+
+host = "localhost"
+port = 4448
+
+addr = (host,port)
+
+server = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+server.bind((host,port))
+
+data, addr = server.recvfrom(1024)
+print(f"Connected {addr[0]}:{addr[1]}")
+
+data = data.decode('utf-8')
+print(f"Client : {data}")
+
+CLIENT
+
+import socket
+
+host = "localhost"
+port = 4448
+
+addr = (host,port)
+
+server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server.connect((host,port))
+
+print("Connected to the server...")
+string = input("Client :")
+server.sendto(bytes(string,'utf-8'),addr)
+
+SEND AND RECV FILE
+
+SERVER
+
+import socket
+
+host = "localhost"
+port = 4448
+
+addr = (host,port)
+
+server = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+server.bind((host,port))
+
+data, addr = server.recvfrom(1024)
+print(f"Connected {addr[0]}:{addr[1]}")
+
+data = data.decode('utf-8')
+print(f"Client : {data}")
+
+while True:
+    
+    inp = input("Server :")
+    server.sendto(bytes(inp,'utf-8'),addr)
+    data, addr = server.recvfrom(1024)
+    string = data.decode('utf-8')
+    
+    if(string == "file"):
+        print(f"Client : {string}")
+        f = open('file.txt','rb')
+        data = f.read(1024)
+        data = str(data)
+        server.sendto(bytes(data,'utf-8'),addr)
+        print("Senting file ...")
+    else:
+        print(f"Client : {string}")
+        
+CLIENT
+
+import socket
+
+host = "localhost"
+port = 4448
+
+addr = (host,port)
+
+server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server.connect((host,port))
+
+print("Connected to the server...")
+
+flag = True
+
+while flag:
+    string = input("Client :")
+    if(string == "file"):
+        server.sendto(bytes(string,'utf-8'),addr)
+        data, addr = server.recvfrom(1024)
+        data = data.decode('utf-8') 
+        with open("file2.txt",'w+') as f:
+            f.write(data)
+            print("File recieved")
+    
+    server.sendto(bytes(string,'utf-8'),addr)
+    data, addr = server.recvfrom(1024)
+    data = data.decode('utf-8')    
+    print(f"Server : {data}")
+    
+
