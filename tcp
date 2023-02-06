@@ -132,7 +132,6 @@ if __name__ == "__main__":
 
 CLIENT
 
-
 import socket
 
 def main():
@@ -156,4 +155,58 @@ def main():
 if __name__ == "__main__":
     main()
 
+VIGENERE CIPHER
+
+SERVER VIGENERE :
+
+import socket
+    
+def decrypt_vigenere(data):    
+    ciphertext = data[0]
+    key = data[1]
+    plaintext = ""
+    for i in range(len(ciphertext)):
+        plaintext += chr((ord(ciphertext[i])-ord(key[i])-65)%26+65)
+    print("PLAINTEXT :",plaintext)
+
+host = "localhost"
+port = 1234
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((host,port))
+server.listen(10)
+
+client,addr = server.accept()
+data = client.recv(1024)
+data = data.decode('utf-8')
+
+data = data.split()
+    
+decrypt_vigenere(data)
+
+CLIENT VIG:
+
+import socket
+
+def encrypt_vigenere(data):
+    plaintext = data[0]
+    key = data[1]
+    ciphertext = ""
+    for i in range(len(plaintext)):
+        ciphertext += chr((ord(plaintext[i])+ord(key[i])-65)%26+65)
+    print("CIPHERTEXT :",ciphertext)
+    text = ciphertext +" " + data[1]
+    server.send(text.encode('utf-8'))
+
+host = "localhost"
+port = 1234
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.connect((host,port))
+
+data = input("ENTER THE TEXT KEY :")
+data = data.split()
+data[1] = (data[1] * (len(data[0])//len(data[1]) +1))[:len(data[0])]
+print(data[1])
+encrypt_vigenere(data)
 
