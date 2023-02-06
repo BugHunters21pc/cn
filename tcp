@@ -210,3 +210,260 @@ data[1] = (data[1] * (len(data[0])//len(data[1]) +1))[:len(data[0])]
 print(data[1])
 encrypt_vigenere(data)
 
+DONE BY H BANK
+
+BANK CLIENT
+
+import socket,sys
+
+client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+try:
+    client.connect(("localhost",9999))
+except socket.error as e:
+    print(str(e))
+
+print("[+] connected to bank server")
+
+opt=True
+
+while opt:
+    name=input("Enter the name of your bank account :").strip(",. '/")
+    client.send(name.encode())
+    response=client.recv(1024).decode()
+    if(response=="Failed to enter the bank :("):
+        print(response)
+        client.close()
+        sys.exit()
+    print(response)
+
+    (choice,amt)=map(str,input("Enter choice and amt ([- 100]- deducts 100 and [+ 100]- adds 100) :").split())
+    #print(choice)
+
+    client.send(choice.encode())
+    client.send(amt.encode())
+
+    res=client.recv(1024).decode()
+    print(res)
+    
+SERVER FOR BANK
+
+import socket,threading,sys
+
+server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+try:
+    server.bind(("10.1.66.254",9999))
+except socket.error as e:
+    print(str(e))
+
+print("[+] waiting for connection")
+
+def funHandle(c,addr):
+    opt=True
+    amt=0
+    print(f"[+] {addr[0]} has connected to the server")
+    while(opt):
+        name=c.recv(1024).decode()
+        l1=[]
+        f=open("bank.csv","r+")
+        for i in f.readlines():
+            if(len(i)!=0):
+                l1.append(i[0:i.index(",")])
+            
+        if(name in l1):
+            status="Success :)"
+            c.send(status.encode())
+        else:
+            status="Failed to enter the bank :("
+            c.send(status.encode())
+            sys.exit()
+        f.close()
+        
+        choice=c.recv(1024).decode()
+        amt=c.recv(1024).decode()
+        
+        print(choice,amt)
+        if(choice=="-"):
+            l=[]
+            
+            f=open("bank.csv","r")
+            l=f.readlines()
+            f.close()
+            #print(l)
+            
+            for i in range(len(l)):
+                if(l[i][0:l[i].index(",")]==name):
+                    print(l[i])
+                    l[i]=l[i].replace(l[i][l[i].index(",")+1:l[i].index("\n")],str(int(l[i][l[i].index(",")+1:])-int(amt)))
+                    rem=l[i][l[i].index(",")+1:]
+                    response=f"The amount remaining after deducting {amt} is {rem}"
+                    c.send(response.encode())
+                    break
+            #print(l)
+            f=open("bank.csv","w")
+            for i in l:
+                f.write(i)
+            f.close()
+                
+        elif(choice=="+"):
+            
+            l=[]
+            
+            f=open("bank.csv","r")
+            l=f.readlines()
+            f.close()
+            #print(l)
+            
+            for i in range(len(l)):
+                if(l[i][0:l[i].index(",")]==name):
+                    print(l[i])
+                    l[i]=l[i].replace(l[i][l[i].index(",")+1:l[i].index("\n")],str(int(l[i][l[i].index(",")+1:])+int(amt)))
+                    rem=l[i][l[i].index(",")+1:]
+                    response=f"The amount remaining after adding {amt} is {rem}"
+                    c.send(response.encode())
+                    break
+            #print(l)
+            f=open("bank.csv","w")
+            for i in l:
+                f.write(i)
+            f.close()
+
+def start():
+        server.listen(5)
+        while True:
+            c,addr=server.accept()
+            thread=threading.Thread(target=funHandle,args=(c,addr))
+            thread.start()
+
+
+start()
+
+BANK MULTITHREADED BY PREETHAM :
+
+CLIENT
+
+import socket,sys
+
+client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+try:
+    client.connect(("localhost",9999))
+except socket.error as e:
+    print(str(e))
+
+print("[+] connected to bank server")
+
+opt=True
+
+while opt:
+    name=input("Enter the name of your bank account :").strip(",. '/")
+    client.send(name.encode())
+    response=client.recv(1024).decode()
+    if(response=="Failed to enter the bank :("):
+        print(response)
+        client.close()
+        sys.exit()
+    print(response)
+
+    (choice,amt)=map(str,input("Enter choice and amt ([- 100]- deducts 100 and [+ 100]- adds 100) :").split())
+    #print(choice)
+
+    client.send(choice.encode())
+    client.send(amt.encode())
+
+    res=client.recv(1024).decode()
+    print(res)
+    
+SERVER :
+
+import socket,threading,sys
+
+server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+try:
+    server.bind(("localhost",9999))
+except socket.error as e:
+    print(str(e))
+
+print("[+] waiting for connection")
+
+def funHandle(c,addr):
+    opt=True
+    amt=0
+    print(f"[+] {addr[0]} has connected to the server")
+    while(opt):
+        name=c.recv(1024).decode()
+        l1=[]
+        f=open("bank.csv","r+")
+        for i in f.readlines():
+            if(len(i)!=0):
+                l1.append(i[0:i.index(",")])
+            
+        if(name in l1):
+            status="Success :)"
+            c.send(status.encode())
+        else:
+            status="Failed to enter the bank :("
+            c.send(status.encode())
+            sys.exit()
+        f.close()
+        
+        choice=c.recv(1024).decode()
+        amt=c.recv(1024).decode()
+        
+        print(choice,amt)
+        if(choice=="-"):
+            l=[]
+            
+            f=open("bank.csv","r")
+            l=f.readlines()
+            f.close()
+            #print(l)
+            
+            for i in range(len(l)):
+                if(l[i][0:l[i].index(",")]==name):
+                    print(l[i])
+                    l[i]=l[i].replace(l[i][l[i].index(",")+1:l[i].index("\n")],str(int(l[i][l[i].index(",")+1:])-int(amt)))
+                    rem=l[i][l[i].index(",")+1:]
+                    response=f"The amount remaining after deducting {amt} is {rem}"
+                    c.send(response.encode())
+                    break
+            #print(l)
+            f=open("bank.csv","w")
+            for i in l:
+                f.write(i)
+            f.close()
+                
+        elif(choice=="+"):
+            
+            l=[]
+            
+            f=open("bank.csv","r")
+            l=f.readlines()
+            f.close()
+            #print(l)
+            
+            for i in range(len(l)):
+                if(l[i][0:l[i].index(",")]==name):
+                    print(l[i])
+                    l[i]=l[i].replace(l[i][l[i].index(",")+1:l[i].index("\n")],str(int(l[i][l[i].index(",")+1:])+int(amt)))
+                    rem=l[i][l[i].index(",")+1:]
+                    response=f"The amount remaining after adding {amt} is {rem}"
+                    c.send(response.encode())
+                    break
+            #print(l)
+            f=open("bank.csv","w")
+            for i in l:
+                f.write(i)
+            f.close()
+
+def start():
+        server.listen(5)
+        while True:
+            c,addr=server.accept()
+            thread=threading.Thread(target=funHandle,args=(c,addr))
+            thread.start()
+
+
+start()
