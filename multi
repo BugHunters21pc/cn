@@ -1,0 +1,54 @@
+SERVER (MAM PROGRAM)
+
+import socket
+import threading
+serverSocket=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+print('server socket created')
+serverSocket.bind(('localhost',12455))
+
+def handle_client():
+    connected=True
+    while connected:
+        msge,addr=serverSocket.recvfrom(1024)
+        print(addr)
+        m=msge.decode()
+        print('MEssage from Client'+m[len(m)-1]+":"+m[0:len(m)-1])
+        serverSocket.sendto(msge[0:len(msge)-1],addr)
+
+def start():
+    while(True):
+        thread=threading.Thread(target=handle_client())
+        thread.start()
+        
+start()
+        
+CLIENT 1 
+
+import socket
+
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+opt='y'
+
+while opt=='y' or opt=='Y':
+    msgeToServer = input('Enter your message to server')
+
+    clientSocket.sendto((msgeToServer+'1').encode(), ('localhost', 12455))
+
+    msgeFromServer = clientSocket.recvfrom(1024)
+    print('Message from server', msgeFromServer[0].decode())
+    op=input("Do you want to continue: ")
+    opt=op
+    
+CLIENT 2
+
+import socket
+
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+msgeToServer = input("Enter your message to server")
+
+clientSocket.sendto((msgeToServer+'2').encode(), ('localhost', 12455))
+
+msgeFromServer = clientSocket.recvfrom(1024)
+print('Message from server', msgeFromServer[0].decode())
+
