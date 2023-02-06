@@ -1,0 +1,87 @@
+BYTE STUFFING SAT:
+
+CLIENT :
+
+def byte_stuffing(data, stuffing_byte):
+    stuffed_data = ""
+    for byte in data:
+        if byte == stuffing_byte:
+            stuffed_data += byte + stuffing_byte
+        else:
+            stuffed_data += byte
+    return stuffed_data
+
+def bit_stuffing(data):
+    return data.replace("11111","11110")
+
+data = "A ESC B ESC FLAG"
+flag = "01111110"
+esc = "10100011"
+
+stuffed_data = byte_stuffing(data.split(), "ESC")
+print("\nSTUFFED BYTE DATA :",stuffed_data)
+
+binary_data = ""
+for byte in stuffed_data:
+    binary_data += format(ord(byte), "08b")
+print("\nBINARY DATA :",binary_data)
+
+stuffed_bit_data = bit_stuffing(binary_data)
+print("\nBIT STUFFED DATA :",stuffed_bit_data)
+frames = [flag+stuffed_bit_data[i:i+16]+flag for i in range(0, len(stuffed_bit_data), 16)]
+print("\nFRAME :",frames)
+
+SERVER :
+
+def bit_unstuffing(data):
+    unstuffed_data = ""
+    count = 0
+    for bit in data:
+        if bit == "1":
+            count += 1
+            unstuffed_data += bit
+            if count == 5:
+                count = 0
+        else:
+            count = 0
+            unstuffed_data += bit
+    return unstuffed_data
+
+def byte_unstuffing(data, stuffing_byte):
+    unstuffed_data = ""
+    i = 0
+    while i < len(data):
+        if data[i] == stuffing_byte:
+            if data[i + 1] == stuffing_byte:
+                unstuffed_data += stuffing_byte
+                i += 1
+            else:
+                unstuffed_data += data[i]
+        else:
+            unstuffed_data += data[i]
+        i += 1
+    return unstuffed_data
+
+def unframe_data(frames, frame_size):
+    data = ""
+    for frame in frames:
+        data += frame[frame_size:]
+    return data
+
+frames = ['01111110010000010010000001111110', '01111110010001010101001101111110', '01111110010000110010000001111110', '01111110010000100010000001111110', '01111110010001010101001101111110', '01111110010000110010000001111110', '01111110010001100100110001111110', '01111110010000010100011101111110']
+flag = "01111110"
+
+# Remove FLAG values
+frames = [frame[8:-8] for frame in frames]
+
+# Perform bit unstuffing
+unstuffed_data = bit_unstuffing(frames)
+print(unstuffed_data)
+
+# Convert to ASCII
+unstuffed_data = byte_unstuffing(unstuffed_data, "ESC")
+original_message = ""
+for i in range(0, len(unstuffed_data), 8):
+    byte = unstuffed_data[i:i+8]
+    original_message += chr(int(byte, 2))
+print(original_message)
