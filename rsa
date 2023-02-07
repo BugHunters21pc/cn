@@ -183,3 +183,79 @@ f = "  ".join([str(elem) for elem in frames])
 print("string frames:",f)
 server.send(bytes(f,'utf-8'))
 
+RSA RSA
+
+SERVER
+
+import socket
+s=socket.socket()
+s.bind(("localhost",9999))
+s.listen(3)
+c,addr=s.accept()
+d_msg=c.recv(1024).decode()
+d_msg=eval(d_msg)
+n=d_msg.pop()
+d=d_msg.pop()
+f=""
+i=0
+while i<len(d_msg):
+    if d_msg[i]==' ':
+        f+=" "
+        i+=1
+    else:
+        k=(d_msg[i]**d) % n 
+        if d_msg[i+1]=='u':
+            f+=chr(k+65)
+        elif d_msg[i+1]=='l':
+            f+=chr(k+97)
+        i+=2
+print(f)
+s.close()
+
+CLIENT
+
+import socket
+cs=socket.socket()
+cs.connect(("localhost",9999))
+def key(p,q):
+    pin=(p-1) * (q-1)
+    c=[]
+    for i in range(3,pin,2):
+        c.append(i)
+    for i in c:
+        if pin%i!=0:
+            e=i
+            break
+    for i in c:
+          if i!=e:
+              if (i*e) % pin==1:
+                  d=i
+    return e,d
+def encrypt(e):
+    k=[]
+    for i in text:
+        j=ord(i)
+        if i.isupper():
+            j-=65
+            k.append((j**e) % n )
+            k.append('u')
+        elif i.islower():
+            j-=97
+            k.append((j**e) % n )
+            k.append('l')
+        elif i.isspace():
+            k.append(' ')
+    return k
+p,q=input("Enter the prime nos: ").split()
+p=int(p)
+q=int(q)
+n=p*q
+e,d=key(p,q)
+text=input("\nEnter the message: ")
+e_msg=encrypt(e)
+print(e_msg)
+e_msg.append(d)
+e_msg.append(n)
+cs.send(str(e_msg).encode())
+cs.close()
+  
