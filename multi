@@ -52,3 +52,295 @@ clientSocket.sendto((msgeToServer+'2').encode(), ('localhost', 12455))
 msgeFromServer = clientSocket.recvfrom(1024)
 print('Message from server', msgeFromServer[0].decode())
 
+HARSHAD PROGRAM :
+CLIENT 1 :
+import socket
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+
+
+def new_user(username,password):
+    try:
+        send_list = 'Register' + " "+ username +" "+ password
+        send_list = str(send_list)
+        clientSocket.sendto(send_list.encode(),('localhost',12345)) #request
+        response,addr = clientSocket.recvfrom(4096) #response  addr contains the connection address
+        print(response.decode())
+    
+    except ConnectionResetError as err:
+        print("Server is Turned Off")
+
+def old_user(username,password):
+    try:
+        send_list = 'Login' + " " + username + " " + password
+        send_list = str(send_list)
+        clientSocket.sendto(send_list.encode(),('localhost',12345)) #request
+        response_login,addr = clientSocket.recvfrom(1024) #response  addr contains the connection address
+        amount,addr = clientSocket.recvfrom(1024) #response  addr contains the connection address
+    
+        if(response_login.decode()=='-1'):
+            print("Login Failed")
+            Bank()
+        else:
+            user_index = response_login.decode()
+            user_index = str(user_index) 
+            print("Login Successful")
+            print("Total Amount = ",amount.decode())
+            print("1.Deposit")
+            print("2.Withdrawal")
+            print("3.Exit")
+            opt2 = int(input("Enter option:"))
+            if(opt2==1):
+                print("Deposit")
+                deposit_amount = int(input("Enter the amount to be Depositted:"))
+                if(deposit_amount<0):
+                    deposit_amount = deposit_amount * -1
+                deposit_amount = str(deposit_amount)
+                user_index = str(user_index)
+                send_list = 'Deposit' + " "+ user_index +" "+deposit_amount
+                clientSocket.sendto(send_list.encode(),('localhost',12345)) #request
+                amount,addr = clientSocket.recvfrom(1024)
+                amount = amount.decode()
+                print("Depositted")
+                print("Total Amount",amount)
+            elif(opt2==2):
+                print("Withdrawal")
+                withdrawl_amount = int(input("Enter the amount to be Withdrawed:"))
+                if(withdrawl_amount<0):
+                    withdrawl_amount = withdrawl_amount * -1
+                withdrawl_amount = str(withdrawl_amount)
+                user_index = str(user_index)
+                send_list = 'Withdrawal' + " "+ user_index +" "+ withdrawl_amount
+                clientSocket.sendto(send_list.encode(),('localhost',12345)) #request
+                amount,addr = clientSocket.recvfrom(1024)
+                amount = amount.decode()
+                print("Withdrawed")
+                print("Total Amount",amount)
+            elif(opt2==3):
+                return 0
+            else:
+                print("Invalid Option")
+                Bank()
+
+
+    except ConnectionResetError as err:
+        print("Server is Turned Off")
+
+def Bank():
+    print("BANK")
+    print("1.New User")
+    print("2.Old User")
+    print("3.Exit")
+    opt1 = input('Enter Option:')
+    if(opt1=='1'):
+        print("Register Here")
+        username = input("Enter username:")
+        password = input("Enter password:")
+        new_user(username,password)
+    elif(opt1=='2'):
+        print("Login")
+        username = input("Enter username:")
+        password = input("Enter password:")
+        old_user(username,password)
+    elif(opt1=='3'):
+        return 0
+
+    else:
+        print("Invalid option")
+        Bank()
+Bank()
+
+CLIENT 2:
+import socket
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+
+
+def new_user(username,password):
+    try:
+        send_list = 'Register' + " "+ username +" "+ password
+        send_list = str(send_list)
+        clientSocket.sendto(send_list.encode(),('localhost',12345)) #request
+        response,addr = clientSocket.recvfrom(4096) #response  addr contains the connection address
+        print(response.decode())
+    
+    except ConnectionResetError as err:
+        print("Server is Turned Off")
+
+def old_user(username,password):
+    try:
+        send_list = 'Login' + " " + username + " " + password
+        send_list = str(send_list)
+        clientSocket.sendto(send_list.encode(),('localhost',12345)) #request
+        response_login,addr = clientSocket.recvfrom(1024) #response  addr contains the connection address
+        amount,addr = clientSocket.recvfrom(1024) #response  addr contains the connection address
+    
+        if(response_login.decode()=='-1'):
+            print("Login Failed")
+            Bank()
+        else:
+            user_index = response_login.decode()
+            user_index = str(user_index) 
+            print("Login Successful")
+            print("Total Amount = ",amount.decode())
+            print("1.Deposit")
+            print("2.Withdrawal")
+            print("3.Exit")
+            opt2 = int(input("Enter option:"))
+            if(opt2==1):
+                print("Deposit")
+                deposit_amount = int(input("Enter the amount to be Depositted:"))
+                if(deposit_amount<0):
+                    deposit_amount = deposit_amount * -1
+                deposit_amount = str(deposit_amount)
+                user_index = str(user_index)
+                send_list = 'Deposit' + " "+ user_index +" "+deposit_amount
+                clientSocket.sendto(send_list.encode(),('localhost',12345)) #request
+                amount,addr = clientSocket.recvfrom(1024)
+                amount = amount.decode()
+                print("Depositted")
+                print("Total Amount",amount)
+            elif(opt2==2):
+                print("Withdrawal")
+                withdrawl_amount = int(input("Enter the amount to be Withdrawed:"))
+                if(withdrawl_amount<0):
+                    withdrawl_amount = withdrawl_amount * -1
+                withdrawl_amount = str(withdrawl_amount)
+                user_index = str(user_index)
+                send_list = 'Withdrawal' + " "+ user_index +" "+ withdrawl_amount
+                clientSocket.sendto(send_list.encode(),('localhost',12345)) #request
+                amount,addr = clientSocket.recvfrom(1024)
+                amount = amount.decode()
+                print("Withdrawed")
+                print("Total Amount",amount)
+            elif(opt2==3):
+                return 0
+            else:
+                print("Invalid Option")
+                Bank()
+
+
+    except ConnectionResetError as err:
+        print("Server is Turned Off")
+
+def Bank():
+    print("BANK")
+    print("1.New User")
+    print("2.Old User")
+    print("3.Exit")
+    opt1 = input('Enter Option:')
+    if(opt1=='1'):
+        print("Register Here")
+        username = input("Enter username:")
+        password = input("Enter password:")
+        new_user(username,password)
+    elif(opt1=='2'):
+        print("Login")
+        username = input("Enter username:")
+        password = input("Enter password:")
+        old_user(username,password)
+    elif(opt1=='3'):
+        return 0
+
+    else:
+        print("Invalid option")
+        Bank()
+Bank()
+
+SERVER:
+import socket
+import threading
+import pandas as pd
+import csv
+filename = 'bank.csv' 
+serverSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+print("Server socket created")
+serverSocket.bind(('localhost', 12345))
+
+
+def check_existance(username):   #returns index and boolean value
+    exist = [False]
+    df_user = pd.read_csv('bank.csv',usecols=['user'])
+    index = -1
+    for usr in df_user.unstack():
+        index = index + 1
+        if(username==usr):    
+            exist[0] = True
+            exist.append(index)
+            return exist
+    return exist
+def new_user(username,password):
+    if(check_existance(username)[0]==False and username!=''):
+        data = pd.read_csv('bank.csv')
+        index = len(data) - 1
+        row = [index,username,password,1000] #1000 default amount
+        with open(filename,'a') as csvfile:
+            csvwriter = csv.writer(csvfile) 
+            csvwriter.writerow(row)
+            return "Account Opened with an Initial deposit of 1000"
+    else:
+        return "Username already exists!!!"
+
+def old_user(username,password):
+    df_user = pd.read_csv('bank.csv',usecols=['user'])
+    df_pass = pd.read_csv('bank.csv',usecols=['password'])
+    df_amount = pd.read_csv('bank.csv',usecols=['amount'])
+    index = -1
+    for usr,pwd,amt in zip(df_user.unstack(),df_pass.unstack(),df_amount.unstack()):
+        index = index + 1
+        if(username==usr and password==pwd):
+                print("Logged In")
+                print("Total Amount = ",amt)
+                return index,amt
+    return -1,0
+
+def handle_client():
+    while 1:
+        request, addr = serverSocket.recvfrom(4096)
+        request = request.decode()
+        request = list(request.split(' '))
+        print(request)
+        if(request[0]=='Register'):
+            send_str = new_user(request[1],request[2])
+            serverSocket.sendto(send_str.encode(),addr)
+        elif(request[0]=='Login'):
+            login_details,amount = old_user(request[1],request[2])
+            login_details = str(login_details)
+            amount = str(amount)
+            serverSocket.sendto(login_details.encode(),addr)
+            serverSocket.sendto(amount.encode(),addr)
+        elif(request[0]=='Deposit'):
+            df = pd.read_csv('bank.csv',usecols=['user','password','amount'])
+            request[1] = int(request[1])
+            amt = df.loc[request[1],'amount']
+            df.loc[request[1],'amount'] = amt + int(request[2])
+            df.to_csv(filename)
+            amt = amt = df.loc[request[1],'amount']
+            amt = str(amt)
+            serverSocket.sendto(amt.encode(),addr)
+
+        elif(request[0]=='Withdrawal'):
+            df = pd.read_csv('bank.csv',usecols=['user','password','amount'])
+            request[1] = int(request[1])
+            amt = df.loc[request[1],'amount']
+            df.loc[request[1],'amount'] = amt - int(request[2])
+            df.to_csv(filename)
+            amt = amt = df.loc[request[1],'amount']
+            amt = str(amt)
+            serverSocket.sendto(amt.encode(),addr)
+
+
+        else:
+            pass
+        
+
+
+
+
+
+def start():
+    while(True):
+        thread = threading.Thread(target = handle_client())
+        thread.start()
+
+start()
