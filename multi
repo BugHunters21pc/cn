@@ -344,3 +344,66 @@ def start():
         thread.start()
 
 start()
+
+
+SERVER:
+
+import socket
+import threading
+
+#ip = socket.gethostbyname(socket.gethostname())
+ip = 'localhost'
+port = 5566
+addr = (ip,port)
+
+
+server = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+server.bind(addr)
+
+print("serrver is listening................")
+
+def handle_client(conn,addr):
+    print("new connection.....")
+    connected = True
+    while connected:
+        msg = conn.recv(1024).decode("utf-8")
+        if msg == "!disconnect":
+            connected = False
+        
+        print(addr," ",msg)
+        
+        msg = msg + "message received"
+        conn.send(msg.encode("utf-8"))
+    
+while True:
+    conn,adr = server.accept()
+    thread = threading.Thread(target=handle_client, args = (conn,adr))
+    thread.start()
+    print(f"[ACTIVE CONNECTIONS] {threading.aactiveCount() - 1}")
+    
+ CLIENT:
+ 
+ import socket
+
+
+ip = socket.gethostbyname(socket.gethostname())
+ip = 'localhost'
+port = 5566
+addr = (ip,port)
+
+client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+client.connect(addr)
+print("CLIENT CNNECTED")
+
+connected  = True
+while connected:
+    msg = input("Enter the message : ")
+    
+    client.send(msg).encode("uft-8")
+    
+    if msg == "dissconnect":
+        connected = False
+    else:
+        msg = client.recv(1024).decode("uft-8")
+        print(msg,"from server")
+    
