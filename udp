@@ -101,5 +101,3 @@ while flag:
     data, addr = server.recvfrom(1024)
     data = data.decode('utf-8')    
     print(f"Server : {data}")
-    
-
