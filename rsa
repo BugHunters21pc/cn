@@ -259,3 +259,96 @@ e_msg.append(n)
 cs.send(str(e_msg).encode())
 cs.close()
   
+sERVER LASTLY ADDED:
+
+import socket,threading
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+s.bind(("localhost",9999))
+def funhandler(c,addr):
+    print(f"{addr[0]} is connected...")
+    while True:
+        d_msg=c.recv(1024).decode()
+        l=d_msg.split(" ")
+        d_msg = l
+        if(len(d_msg)!=1):
+            print(d_msg)
+            n=d_msg.pop()
+            d=d_msg.pop()
+            f=""
+            i=0
+            while i<len(d_msg):
+                if d_msg[i]==' ':
+                    f+=" "
+                    i+=1
+                else:
+                    k=(int(d_msg[i])**int(d)) % int(n) 
+                    if d_msg[i+1]=='u':
+                        f+=chr(k+65)
+                    elif d_msg[i+1]=='l':
+                        f+=chr(k+97)
+                    i+=2
+            print(f)
+    c.close()
+def start():
+    s.listen(5)
+    while True:
+        c,addr = s.accept()
+        thread=threading.Thread(target=funhandler,args=(c,addr))
+        thread.start()
+
+start()
+
+
+CLIENT LASTLY ADDED:
+
+import socket
+import random,string,sympy
+
+cs=socket.socket()
+cs.connect(("localhost",9999))
+def key(p,q):
+    pin=(p-1) * (q-1)
+    c=[]
+    for i in range(3,pin,2):
+        c.append(i)
+    for i in c:
+        if pin%i!=0:
+            e=i
+            break
+    for i in c:
+          if i!=e:
+              if (i*e) % pin==1:
+                  d=i
+    return e,d
+    
+def encrypt(e):
+    k=""
+    for i in text:
+        j=ord(i)
+        if i.isupper():
+            j-=65
+            k+=str((j**e) % n )
+            k+=' u '
+        elif i.islower():
+            j-=97
+            k+=str((j**e) % n )
+            k+=' l '
+        elif i.isspace():
+            k+=' '
+    return k
+
+p=random.randint(1,100)
+q=random.randint(1,100)
+
+while sympy.isprime(p)!=True:
+    p=random.randint(1,100)
+while sympy.isprime(q)!=True:
+    q=random.randint(1,100)
+
+n=p*q
+e,d=key(p,q)
+text=input("\nEnter the message: ")
+e_msg=encrypt(e)
+e_msg+=str(d)+" "+str(n)
+cs.send(e_msg.encode())
+cs.close()
