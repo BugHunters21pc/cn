@@ -142,6 +142,57 @@ start_vertex = 'A'
 distances = dijkstra(graph, start_vertex)
 print(distances)
 
+#Dijkstra if src and dst
+
+import heapq
+
+import heapq
+
+def dijkstra(graph, start, end):
+    distances = {vertex: float('infinity') for vertex in graph}  # Set all initial distances to infinity
+    distances[start] = 0  # Set the starting vertex's distance to 0
+    pq = [(0, start)]  # Add the starting vertex to the heap with priority 0
+    visited = set()  # Keep track of visited vertices
+    
+    while pq:
+        current_distance, current_vertex = heapq.heappop(pq)  # Get the vertex with the smallest distance
+        
+        if current_vertex == end:
+            break  # If we've reached the end vertex, exit the loop
+        
+        if current_vertex in visited:
+            continue  # Skip if we've already visited this vertex
+        
+        visited.add(current_vertex)  # Mark the vertex as visited
+        
+        for neighbor, weight in graph[current_vertex].items():  # Check each neighboring vertex
+            distance = current_distance + weight  # Calculate the distance to the neighboring vertex
+            
+            if distance < distances[neighbor]:  # If the new distance is less than the previously calculated distance
+                distances[neighbor] = distance  # Update the distance
+                heapq.heappush(pq, (distance, neighbor))  # Add the neighboring vertex to the heap with the updated distance
+               
+    return distances[end]  # Return the shortest distance to the end vertex
+
+
+
+graph = {
+    'R1': {'R2': 10, 'R3': 5, 'NetworkA': 0, 'NetworkB': 0},
+    'R2': {'R1': 10, 'R3': 6, 'NetworkC': 0},
+    'R3': {'R1': 5, 'R2': 6, 'NetworkD': 0},
+    'NetworkA': {'R1': 0},
+    'NetworkB': {'R1': 0},
+    'NetworkC': {'R2': 0},
+    'NetworkD': {'R3': 0}
+}
+
+
+start_vertex = 'NetworkA'
+end = 'NetworkD'
+distances = dijkstra(graph, start_vertex,end)
+print(distances)
+
+
 #Bellman ford
 
 def bellman_ford(graph, start):
