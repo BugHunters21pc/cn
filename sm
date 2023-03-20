@@ -1,0 +1,178 @@
+#reciever Go back N arq
+
+import socket
+
+# Initialize socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server_address = ('localhost', 10000)
+sock.bind(server_address)
+
+# Expected sequence number
+expected_seq_num = 0
+
+# Window size
+N = 3
+
+while True:
+    # Receive packet
+    packet, address = sock.recvfrom(1024)
+    packet_data = packet.decode().split(':')
+    seq_num = int(packet_data[0])
+    message = packet_data[1]
+    
+    print("OUTER")
+    # Check sequence number
+    if seq_num == expected_seq_num:
+        print(message)
+
+        # Send ACK
+        ack = str(seq_num)
+        sock.sendto(ack.encode(), address)
+
+        # Move window
+        expected_seq_num += 1
+        print("exp_seq :", expected_seq_num)
+
+        # Handle out-of-order packets
+        while True:
+            print("INNER")
+            try:
+                packet, address = sock.recvfrom(1024)
+                packet_data = packet.decode().split(':')
+                seq_num = int(packet_data[0])
+                message = packet_data[1]
+
+                if seq_num == expected_seq_num:
+                    print(message)
+
+                    # Send ACK
+                    ack = str(seq_num)
+                    sock.sendto(ack.encode(), address)
+
+                    # Move window
+                    expected_seq_num += 1
+                else:
+                    break
+            except socket.timeout:
+                break
+    else:
+        # Discard packet
+        pass
+
+#sender Go Back N arq
+
+import socket
+
+# Initialize socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server_address = ('localhost', 10000)
+
+# Data to be sent
+data = ['packet1', 'packet2', 'packet3', 'packet4', 'packet5']
+
+# Window size
+N = 3
+
+# Sequence number
+seq_num = 0
+
+# Send packets
+while seq_num < len(data):
+    print(f"seq:{seq_num}")
+    # Send N packets
+    for i in range(seq_num, min(seq_num + N, len(data))):
+        message = str(seq_num) + ':' + data[i]
+        print(message)
+        sock.sendto(message.encode(), server_address)
+    # Wait for ACKs
+    try:
+        sock.settimeout(1)
+        while True:
+            ack, address = sock.recvfrom(1024)
+            ack_seq_num = int(ack.decode())
+            print(f"ack: {ack_seq_num}")
+            if ack_seq_num >= seq_num:
+                seq_num = ack_seq_num + 1
+                
+    except socket.timeout:
+        pass
+
+#Dijikstra
+
+import heapq
+
+def dijkstra(graph, start):
+    distances = {vertex: float('infinity') for vertex in graph}  # Set all initial distances to infinity
+    #print(distances)
+    distances[start] = 0  # Set the starting vertex's distance to 0
+    pq = [(0, start)]  # Add the starting vertex to the heap with priority 0
+   
+    visited = set()  # Keep track of visited vertices
+    
+    while pq:
+        current_distance, current_vertex = heapq.heappop(pq)  # Get the vertex with the smallest distance
+        
+        print (current_distance, current_vertex)
+        #print(pq)
+        if current_vertex in visited:
+            continue  # Skip if we've already visited this vertex
+        
+        visited.add(current_vertex)  # Mark the vertex as visited
+        
+        for neighbor, weight in graph[current_vertex].items():  # Check each neighboring vertex
+            distance = current_distance + weight  # Calculate the distance to the neighboring vertex
+            
+            if distance < distances[neighbor]:  # If the new distance is less than the previously calculated distance
+                distances[neighbor] = distance  # Update the distance
+                heapq.heappush(pq, (distance, neighbor))  # Add the neighboring vertex to the heap with the updated distance
+        #print(distances)       
+    return distances
+
+
+graph = {
+    'A': {'B': 3, 'C': 4, 'D': 2},
+    'B': {'A': 3, 'C': 5, 'E': 9},
+    'C': {'A': 4, 'B': 5, 'D': 1, 'E': 6},
+    'D': {'A': 2, 'C': 1, 'F': 8},
+    'E': {'B': 9, 'C': 6, 'F': 7},
+    'F': {'D': 8, 'E': 7}
+}
+
+start_vertex = 'A'
+distances = dijkstra(graph, start_vertex)
+print(distances)
+
+#Bellman ford
+
+def bellman_ford(graph, start):
+    # Initialize the distances dictionary with start vertex having distance 0 and all other vertices having infinity distance.
+    distances = {vertex: float('infinity') for vertex in graph}
+    distances[start] = 0
+    
+    # Iterate over all edges V-1 times, where V is the number of vertices in the graph.
+    for _ in range(len(graph) - 1):
+        # For each edge (u, v) with weight w in the graph, update the distance to v if the distance to u plus w is smaller than the current distance to v.
+        for u in graph:
+            for v, w in graph[u].items():
+                if distances[u] + w < distances[v]:
+                    distances[v] = distances[u] + w
+    
+    # Check for negative-weight cycles.
+    for u in graph:
+        for v, w in graph[u].items():
+            if distances[u] + w < distances[v]:
+                raise ValueError("Negative weight cycle detected")
+    
+    return distances
+
+graph = {
+    'A': {'B': 3, 'C': 4, 'D': 2},
+    'B': {'A': 3, 'C': 5, 'E': 9},
+    'C': {'A': 4, 'B': 5, 'D': 1, 'E': 6},
+    'D': {'A': 2, 'C': 1, 'F': 8},
+    'E': {'B': 9, 'C': 6, 'F': 7},
+    'F': {'D': 8, 'E': 7}
+}
+
+print(bellman_ford(graph, 'A'))
+
