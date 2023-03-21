@@ -146,8 +146,6 @@ print(distances)
 
 import heapq
 
-import heapq
-
 def dijkstra(graph, start, end):
     distances = {vertex: float('infinity') for vertex in graph}  # Set all initial distances to infinity
     distances[start] = 0  # Set the starting vertex's distance to 0
