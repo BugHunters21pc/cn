@@ -146,11 +146,13 @@ print(distances)
 
 import heapq
 
+
 def dijkstra(graph, start, end):
     distances = {vertex: float('infinity') for vertex in graph}  # Set all initial distances to infinity
     distances[start] = 0  # Set the starting vertex's distance to 0
     pq = [(0, start)]  # Add the starting vertex to the heap with priority 0
     visited = set()  # Keep track of visited vertices
+    previous_vertices = {vertex: None for vertex in graph}  # Keep track of previous vertices
     
     while pq:
         current_distance, current_vertex = heapq.heappop(pq)  # Get the vertex with the smallest distance
@@ -168,10 +170,20 @@ def dijkstra(graph, start, end):
             
             if distance < distances[neighbor]:  # If the new distance is less than the previously calculated distance
                 distances[neighbor] = distance  # Update the distance
+                previous_vertices[neighbor] = current_vertex  # Update the previous vertex
                 heapq.heappush(pq, (distance, neighbor))  # Add the neighboring vertex to the heap with the updated distance
-               
-    return distances[end]  # Return the shortest distance to the end vertex
-
+                
+    path = [end]  # Start with the end vertex
+    current_vertex = end
+    
+    while current_vertex != start:
+        previous_vertex = previous_vertices[current_vertex]
+        path.append(previous_vertex)
+        current_vertex = previous_vertex
+        
+    path.reverse()  # Reverse the path to get the correct order
+    
+    return distances[end], path
 
 
 graph = {
@@ -187,8 +199,9 @@ graph = {
 
 start_vertex = 'NetworkA'
 end = 'NetworkD'
-distances = dijkstra(graph, start_vertex,end)
-print(distances)
+distance, path = dijkstra(graph, start_vertex, end)
+print(f"The shortest distance from {start_vertex} to {end} is {distance}.")
+print(f"The path is {path}.")
 
 
 #Bellman ford
