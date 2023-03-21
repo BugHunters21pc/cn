@@ -324,5 +324,73 @@ datagram, message = ip_reassembly(fragments);
 print('Datagram:', datagram.hex())
 print('Message:', message.decode())
 
+#sender part for ip
+
+import socket
+import sys
+sys.path.append('/path/to/the/directory')
+
+# Define the address and port to send the message to
+address = '127.0.0.1'
+port = 12345
+
+# Define the message to send
+message = b'This is a test message to be fragmented into multiple IP packets.'
+
+# Define the maximum transmission unit (MTU) for the network
+mtu = 50
+
+# Fragment the message
+fragments = ip_fragmentation(message, mtu)
+
+# Create a UDP socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+# Send each fragment over the network
+for fragment in fragments:
+    sock.sendto(fragment, (address, port))
+
+# Close the socket
+sock.close()
+
+#reciever part for ip
+
+import socket
+import sys
+sys.path.append('/path/to/the/directory')
+
+# Define the address and port to receive the message on
+address = '127.0.0.1'
+port = 12345
+
+# Create a UDP socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+# Bind the socket to the address and port
+sock.bind((address, port))
+
+# Create an empty list to store the received fragments
+fragments = []
+
+# Receive all of the fragments
+while True:
+    # Receive a fragment from the network
+    fragment, addr = sock.recvfrom(65535)
+    
+    # If the fragment is empty, we have received all of the fragments
+    if not fragment:
+        break
+    
+    # Add the fragment to the list of received fragments
+    fragments.append(fragment)
+
+# Close the socket
+sock.close()
+
+# Reassemble the fragments into the original message
+datagram, message = ip_reassembly(fragments)
+
+# Print the original message
+print('Received message:', message)
 
 
