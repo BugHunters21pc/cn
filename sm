@@ -862,3 +862,523 @@ while True:
                 time.sleep(1)
             
             
+@@@@@@@@@@@@@@@@@@@@@@@@ vishnu code @@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+import heapq
+
+def dijkstra(graph, start, end):
+    """
+    Compute the shortest path between start and end in the given graph using Dijkstra's algorithm.
+    Returns the shortest path and its cost.
+    """
+    queue = [(0, start, [])]
+    visited = set()
+    while queue:
+        (cost, node, path) = heapq.heappop(queue)
+        if node not in visited:
+            visited.add(node)
+            path = path + [node]
+            if node == end:
+                return path, cost
+            for neighbor, neighbor_cost in graph[node].items():
+                if neighbor not in visited:
+                    heapq.heappush(queue, (cost + neighbor_cost, neighbor, path))
+    return None, None
+
+# Define the network topology and link costs
+network_topology = {
+    'A': {'B': 5, 'C': 3},
+    'B': {'A': 5, 'C': 2, 'D': 4},
+    'C': {'A': 3, 'B': 2, 'D': 7},
+    'D': {'B': 4, 'C': 7},
+}
+
+# Define the path for each IP fragment
+fragment_paths = []
+fragment_paths.append(['A', 'B', 'D'])  # path for fragment 1
+fragment_paths.append(['A', 'C', 'D'])  # path for fragment 2
+fragment_paths.append(['B', 'C', 'D'])  # path for fragment 3
+
+# Compute the shortest path and its cost for each IP fragment
+for i, path in enumerate(fragment_paths):
+    start = path[0]
+    end = path[-1]
+    shortest_path, cost = dijkstra(network_topology, start, end)
+    print("Shortest path for fragment {}: {}".format(i+1, shortest_path))
+    print("Cost of shortest path for fragment {}: {}".format(i+1, cost))
+    
+    
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ KAAAVYA CODES $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+SELECTIVE REPEAT SENDER 
+
+
+#Name    : Sayali Deo
+#Roll No : 7926
+#Class   : TE Computers
+#Batch   : A
+# Selective Repeat ARQ - Server Side Code
+
+import socket
+import random
+def server_program():
+    # get the hostname
+    host = socket.gethostname()
+    port = 12344  # initiate port no above 1024
+    exp = 0
+    n = 4
+    new = 1
+    win_start = 0
+    win_end   = win_start + n - 1
+    receiver = []
+    server_socket = socket.socket()  # get instance
+    # look closely. The bind() function takes tuple as argument
+    server_socket.bind((host, port))  # bind host address and port together
+
+    # configure how many client the server can listen simultaneously
+    server_socket.listen(2)
+    conn, address = server_socket.accept()  # accept new connection
+    print "Connection from: ", str(address)
+    while True:
+        # receive data stream. it won't accept data packet greater than 1024 bytes
+        data = conn.recv(1024).decode()
+        if not data:
+            # if data is not received break
+            break
+	rec = int(data)
+	lim = rec + n - 1
+	count = 0
+	flag = 0
+	ack = rec
+	
+	
+	randy = random.randint(1, 4)
+	if new == 1 : 			#you received a new frame of a new window
+		while(count != randy):
+			temp = random.randint(rec, lim)
+			
+			if temp not in receiver:
+				print "Received Frame -> ", temp
+				count+=1
+				flag = 1       #Atleast one new frame added in receiver buffer
+				receiver.append(temp)
+	else :
+		print "Received Frame -> ", rec       #you received a new frame of an old window  
+		receiver.append(rec)
+		flag = 1
+        if(flag == 1):
+		for i in range(rec,lim+1):
+			if i not in receiver:
+				ack = i
+				break
+			ack = i+1
+	
+	print "Sending ACK    -> ", ack #next expected frame
+        print '***************************************************'
+	data = str(ack)
+        conn.send(data.encode())  # send data to the client
+
+	if ack > win_end :
+		win_start = ack
+		win_end   = win_start + n - 1
+		new = 1			# now receive a new frame of a new window
+	else :
+		new = 0 		# now received a new frame of an old window
+
+    conn.close()  # close the connection
+
+
+if __name__ == '__main__':
+    server_program()
+
+############################# OUTPUT : Server Side ##########################
+'''sayali@sayali:~/Desktop/Saiy/MyDocs/CN $ python serselect.py
+Connection from:  ('127.0.0.1', 40912)
+Received Frame ->  0
+Received Frame ->  3
+Received Frame ->  2
+Received Frame ->  1
+Sending ACK    ->  4
+***************************************************
+Received Frame ->  6
+Received Frame ->  5
+Sending ACK    ->  4
+***************************************************
+Received Frame ->  4
+Sending ACK    ->  7
+***************************************************
+Received Frame ->  7
+Sending ACK    ->  8
+***************************************************
+Received Frame ->  9
+Received Frame ->  11
+Received Frame ->  8
+Received Frame ->  10
+Sending ACK    ->  12
+***************************************************
+sayali@sayali:~/Desktop/Saiy/MyDocs/CN $ '''
+
+
+
+RECEIVER 
+
+import socket
+
+def client_program():
+	n = 4
+    	win_start = 0
+	win_end = win_start + n - 1
+	host = socket.gethostname()  # as both code is running on same pc
+	port = 12344  # socket server port number
+	sender = []
+	flag = 0 #send whole sender list else 1 means send only win_start frame
+	client_socket = socket.socket()  # instantiate
+	client_socket.connect((host, port))  # connect to the server
+	print 'Window Size is ', n
+	print '******** Enter "bye" to close connection ***************'
+        message = raw_input("Hit any key to start sending frames -> ")  # take input
+        while message.lower().strip() != 'bye':
+		print "Sending frames..."
+		if (flag == 0):
+			for i in range(n):
+				sender.append(win_start + i)
+			for i in sender :
+				print "Frame -> ", i
+		else:
+			print "Frame -> ", win_start
+		msg = str(win_start)
+        	client_socket.send(msg.encode())  # send message
+        	data = client_socket.recv(1024).decode()  # receive NAK
+		msg = str(data)
+		ack = int(msg)
+		if ack not in sender:
+			win_start = ack
+			win_end = win_start + n - 1
+			flag = 0         		#send new frame
+			for i in range(n):
+				sender.pop()
+		else:
+			win_start = int(msg)
+			flag = 1			#send old frame
+			
+		print "************************************"
+        	print 'Received ACK server: ' + data  # show in terminal
+		
+        	message = raw_input("Hit any key to start sending frames -> ")  # again take input
+
+    	client_socket.close()  # close the connection
+
+
+if __name__ == '__main__':
+    client_program()
+
+
+######################### OUTPUT : Client Side #################################
+Window Size is  4
+******** Enter "bye" to close connection ***************
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  0
+Frame ->  1
+Frame ->  2
+Frame ->  3
+************************************
+Received ACK server: 4
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  4
+Frame ->  5
+Frame ->  6
+Frame ->  7
+************************************
+Received ACK server: 4
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  4
+************************************
+Received ACK server: 7
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  7
+************************************
+Received ACK server: 8
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  8
+Frame ->  9
+Frame ->  10
+Frame ->  11
+************************************
+Received ACK server: 12
+Hit any key to start sending frames -> bye
+
+GO BACK RECEIVER 
+
+import time, socket, sys
+import random
+
+print("\nWelcome to Chat Room\n")
+print("Initialising....\n")
+time.sleep(1)
+
+s = socket.socket()
+shost = socket.gethostname()
+ip = socket.gethostbyname(shost)
+print(shost, "(", ip, ")\n")
+host = input(str("Enter server address: "))
+name = input(str("\nEnter your name: "))
+port = 1234
+print("\nTrying to connect to ", host, "(", port, ")\n")
+time.sleep(1)
+s.connect((host, port))
+print("Connected...\n")
+
+s.send(name.encode())
+s_name = s.recv(1024)
+s_name = s_name.decode()
+print(s_name, "has joined the chat room\nEnter [e] to exit chat room\n")
+
+while True:
+
+    m=s.recv(1024)
+    m=m.decode()
+    k=s.recv(1024)
+    k=k.decode()
+    k=int(k)
+    i=0
+    a=""
+    b=""
+    f=random.randint(0,1)
+    message=""
+    while i!=k:
+       
+       
+       f=random.randint(0,1)
+       if(f==0):
+          b="ACK Lost"
+          message = s.recv(1024)
+          message = message.decode()
+          s.send(b.encode())
+         
+       elif(f==1):
+          b="ACK "+str(i)
+          message = s.recv(1024)
+          message = message.decode()
+          
+          s.send(b.encode())
+          a=a+message
+          i=i+1
+          
+       
+    
+    print("The message received is :", m)
+    
+    
+    GO BACK SENDER
+    
+    # Sender.py
+import time, socket, sys
+
+def decimalToBinary(n):  
+    return n.replace("0b", "")
+
+def binarycode(s):
+    a_byte_array = bytearray(s, "utf8")
+
+    byte_list = []
+
+    for byte in a_byte_array:
+        binary_representation = bin(byte)
+        byte_list.append(decimalToBinary(binary_representation))
+
+    #print(byte_list)
+    a=""
+    for i in byte_list:
+        a=a+i
+    return a
+
+print("\nWelcome to Chat Room\n")
+print("Initialising....\n")
+time.sleep(1)
+
+s = socket.socket()
+host = socket.gethostname()
+ip = socket.gethostbyname(host)
+port = 1234
+s.bind((host, port))
+print(host, "(", ip, ")\n")
+name = input(str("Enter your name: "))
+           
+s.listen(1)
+print("\nWaiting for incoming connections...\n")
+conn, addr = s.accept()
+print("Received connection from ", addr[0], "(", addr[1], ")\n")
+
+s_name = conn.recv(1024)
+s_name = s_name.decode()
+print(s_name, "has connected to the chat room\nEnter [e] to exit chat room\n")
+conn.send(name.encode())
+
+while True:
+    message = input(str("Me : "))
+    conn.send(message.encode())
+    if message == "[e]":
+        message = "Left chat room!"
+        conn.send(message.encode())
+        print("\n")
+        break
+    message=binarycode(message)
+    f=str(len(message))
+    conn.send(f.encode())
+   
+    i=0
+    j=0
+    j=int(input("Enter the window size -> "))
+    
+   
+    b=""
+   
+    j=j-1
+    f=int(f)
+    k=j
+    while i!=f:
+        while(i!=(f-j)):
+            conn.send(message[i].encode())
+            b=conn.recv(1024)
+            b=b.decode()
+            print(b)
+            if(b!="ACK Lost"):
+                time.sleep(1)
+                print("Acknowledgement Received! The sliding window is in the range "+(str(i+1))+" to "+str(k+1)+" Now sending the next packet")
+                i=i+1
+                k=k+1
+                time.sleep(1)
+            else:
+                time.sleep(1)
+                print("Acknowledgement of the data bit is LOST! The sliding window remains in the range "+(str(i+1))+" to "+str(k+1)+" Now Resending the same packet")
+                time.sleep(1)
+        while(i!=f):
+            
+            conn.send(message[i].encode())
+            b=conn.recv(1024)
+            b=b.decode()
+            print(b)
+            if(b!="ACK Lost"):
+                time.sleep(1)
+                print("Acknowledgement Received! The sliding window is in the range "+(str(i+1))+" to "+str(k)+" Now sending the next packet")
+                i=i+1
+                time.sleep(1)
+            else:
+                time.sleep(1)
+                print("Acknowledgement of the data bit is LOST! The sliding window remains in the range "+(str(i+1))+" to "+str(k)+" Now Resending the same packet")
+                time.sleep(1)
+            
+	    
+	 DIJIKSTRA 
+	 
+	 
+	 def dijkstra(graph, start, end):
+    # Initialize distances to all nodes as infinity
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    
+    # Initialize the visited set and the predecessor dictionary
+    visited = set()
+    predecessors = {}
+    
+    while len(visited) < len(graph):
+        # Find the unvisited node with the smallest distance
+        current_node = min((node for node in graph if node not in visited), key=lambda node: distances[node])
+        
+        # If we've reached the destination node, construct the path and return it
+        if current_node == end:
+            path = []
+            while current_node in predecessors:
+                path.append(current_node)
+                current_node = predecessors[current_node]
+            path.append(start)
+            path.reverse()
+            return path, distances[end]
+        
+        # If we haven't reached the destination node yet, update the distances to its neighbors
+        for neighbor, weight in graph[current_node].items():
+            distance = distances[current_node] + weight
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                predecessors[neighbor] = current_node
+        
+        # Mark the current node as visited
+        visited.add(current_node)
+    
+    # If we've exhausted all reachable nodes without reaching the destination, there's no path
+    return None, None
+
+
+graph = {
+    1: {2: 5, 4: 6},
+    2: {3: 8, 5: 9, 6: 8},
+    3: {5: 6, 8: 15},
+    4: {6: 4, 7: 9},
+    5: {9: 13},
+    6: {7: 6, 8: 14},
+    7: {9: 11},
+    8: {9: 9, 10: 9},
+    9: {10: 6, 11: 5, 12: 12},
+    10: {},
+    11: {},
+    12: {}
+}
+print(dijkstra(graph, 1,12))
+
+BELLMAN FORD 
+
+
+def bellman_ford(graph, start, end):
+    # Step 1: Initialize distances and predecessors
+    distances = {node: float('inf') for node in graph}
+    predecessors = {node: None for node in graph}
+    distances[start] = 0
+
+    # Step 2: Relax edges repeatedly
+    for _ in range(len(graph) - 1):
+        for node in graph:
+            for neighbor, weight in graph[node].items():
+                if distances[node] + weight < distances[neighbor]:
+                    distances[neighbor] = distances[node] + weight
+                    predecessors[neighbor] = node
+
+    # Step 3: Check for negative-weight cycles
+    for node in graph:
+        for neighbor, weight in graph[node].items():
+            if distances[node] + weight < distances[neighbor]:
+                raise ValueError("Graph contains a negative-weight cycle")
+
+    # Step 4: Build the shortest path
+    path = []
+    node = end
+    while node is not None:
+        path.append(node)
+        node = predecessors[node]
+    path.reverse()
+
+    # Step 5: Return the shortest path and its weight
+    return path, distances[end]
+
+
+graph = {
+    1: {2: 5, 4: 6},
+    2: {3: 8, 5: 9, 6: 8},
+    3: {5: 6, 8: 15},
+    4: {6: 4, 7: 9},
+    5: {9: 13},
+    6: {7: 6, 8: 14},
+    7: {9: 11},
+    8: {9: 9, 10: 9},
+    9: {10: 6, 11: 5, 12: 12},
+    10: {},
+    11: {},
+    12: {}
+}
+print(bellman_ford(graph, 1,12))
