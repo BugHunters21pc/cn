@@ -1,3 +1,71 @@
+KEYS: 
+
+note: add sk- in the starting for valid key.
+
+21pc13 - ir03zcgGgr9UkFYiwGxvT3BlbkFJLag01jLVoe6Ou8rmNURP
+
+21pc19 - OTaSzNANFaH4Zmuvq0ZnT3BlbkFJY4mcSLWyAPW3eL2ncMnP
+
+21pc01 - MnNdC1SzSEAVCbkCjWszT3BlbkFJC2pLCtUuSSOFZ2FEHnk0
+
+21pc23 - INRCrAyyf59hecbwEzZ4T3BlbkFJwxOHbwTHMxmSt38tCMl0
+
+21pc09 - 1jApbfQ7iUzaC3GHHdDhT3BlbkFJUTdesQZ3HR4k1S1iRZtb
+
+21pc18 - CPGhX4VVVKt2upUsQXasT3BlbkFJTYdxA1WyYxKyvQiSlW74
+
+21PC17 - N3SGxCzzYXhklGVdYONzT3BlbkFJ8OkrvzwTGUIWqCESyGFy
+
+21PC25-  seTTDNEvkkbhI3WmCauyT3BlbkFJycCBfk5MVkv4HOb2XYeI
+
+21PC31 - 74evNFm4ggpif3IgA2pGT3BlbkFJzPhlTuYbxQWHQQFGxqhB
+ 
+21PC29 - MxneXSIrPTOBvEKWOGx7T3BlbkFJ9rv0hg1pyQPw3UtVSuzL
+
+21PC05 - NpkxX52f5PP9yrDr3vEXT3BlbkFJVl8yy28JgXNAtjtcFLC1
+
+21PC11 - dFb0vJEFxogCg9V6pYNrT3BlbkFJm1r4ZNzv4QSCLt4xDGPp
+
+21pc08 - CczCJ2AJ25eiIQyIhvdST3BlbkFJoG5JGbrwGWWcq1TcX2Fq
+
+21pc07 - as7gS0iDPVAwNlEsX1QKT3BlbkFJZqpvxsdsBvXiFKTmwFx0
+
+21PC33 - WiFt7TW5SiPGINOSKMSKT3BlbkFJx78bP0jXvVY7qQ1AEKOp
+
+21PC03 - bjmFzzIlFQN5NF991KYTT3BlbkFJuDBP3rTgh58b0rIFW8Cq
+
+21PC22 - 8MYhqw0oMftMpE3J2plHT3BlbkFJKdbc5xdIJ8qxrCM6yPHE
+
+21PC16 - nuQfsp7Pdkgbz3zBiBK8T3BlbkFJ5I2YTgLGuvelHN1GLae4
+
+21PC10 - tp0ABygyRFX9J8dSfMUTT3BlbkFJiKjnBJQuMuQNupGSQrFn
+
+21PC28 - AGb10wZYfzxfISn32BY7T3BlbkFJ4VivBAgrCJOHdvE8b5en
+
+21PC04 - lra8SADSevtbaNF3g2X0T3BlbkFJgSZ9ZyKw9GDO961p8Z6L
+
+SMRITHI ticbNikh8ATmr5cn2Q3zT3BlbkFJHYTzkzWp5r8MTBBmUk4i
+
+
+import openai
+
+openai.api_key = "your api key"
+
+
+response = openai.ChatCompletion.create(
+    model="gpt-3.5-turbo",
+    messages=[
+            {"role": "system", "content": "You are a chatbot"},
+            {"role": "user", "content": "implement BELLMAN FORD algorithm using python"},
+        ]
+)
+
+result = ''
+for choice in response.choices:
+    result += choice.message.content
+
+print(result)
+
 #reciever Go back N arq
 
 import socket
@@ -96,6 +164,236 @@ while seq_num < len(data):
                 
     except socket.timeout:
         pass
+# selective repeat 
+
+//selective repeat
+import socket
+
+def client_program():
+	n = 4
+    	win_start = 0
+	win_end = win_start + n - 1
+	host = socket.gethostname()  # as both code is running on same pc
+	port = 12344  # socket server port number
+	sender = []
+	flag = 0 #send whole sender list else 1 means send only win_start frame
+	client_socket = socket.socket()  # instantiate
+	client_socket.connect((host, port))  # connect to the server
+	print 'Window Size is ', n
+	print '******** Enter "bye" to close connection ***************'
+        message = raw_input("Hit any key to start sending frames -> ")  # take input
+        while message.lower().strip() != 'bye':
+		print "Sending frames..."
+		if (flag == 0):
+			for i in range(n):
+				sender.append(win_start + i)
+			for i in sender :
+				print "Frame -> ", i
+		else:
+			print "Frame -> ", win_start
+		msg = str(win_start)
+        	client_socket.send(msg.encode())  # send message
+        	data = client_socket.recv(1024).decode()  # receive NAK
+		msg = str(data)
+		ack = int(msg)
+		if ack not in sender:
+			win_start = ack
+			win_end = win_start + n - 1
+			flag = 0         		#send new frame
+			for i in range(n):
+				sender.pop()
+		else:
+			win_start = int(msg)
+			flag = 1			#send old frame
+			
+		print "************************************"
+        	print 'Received ACK server: ' + data  # show in terminal
+		
+        	message = raw_input("Hit any key to start sending frames -> ")  # again take input
+
+    	client_socket.close()  # close the connection
+
+
+if __name__ == '__main__':
+    client_program()
+
+
+######################### OUTPUT : Client Side #################################
+
+Window Size is  4
+******** Enter "bye" to close connection ***************
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  0
+Frame ->  1
+Frame ->  2
+Frame ->  3
+************************************
+Received ACK server: 4
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  4
+Frame ->  5
+Frame ->  6
+Frame ->  7
+************************************
+Received ACK server: 4
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  4
+************************************
+Received ACK server: 7
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  7
+************************************
+Received ACK server: 8
+Hit any key to start sending frames -> 
+Sending frames...
+Frame ->  8
+Frame ->  9
+Frame ->  10
+Frame ->  11
+************************************
+Received ACK server: 12
+Hit any key to start sending frames -> bye
+
+
+import socket
+import random
+def server_program():
+    # get the hostname
+    host = socket.gethostname()
+    port = 12344  # initiate port no above 1024
+    exp = 0
+    n = 4
+    new = 1
+    win_start = 0
+    win_end   = win_start + n - 1
+    receiver = []
+    server_socket = socket.socket()  # get instance
+    # look closely. The bind() function takes tuple as argument
+    server_socket.bind((host, port))  # bind host address and port together
+
+    # configure how many client the server can listen simultaneously
+    server_socket.listen(2)
+    conn, address = server_socket.accept()  # accept new connection
+    print "Connection from: ", str(address)
+    while True:
+        # receive data stream. it won't accept data packet greater than 1024 bytes
+        data = conn.recv(1024).decode()
+        if not data:
+            # if data is not received break
+            break
+	rec = int(data)
+	lim = rec + n - 1
+	count = 0
+	flag = 0
+	ack = rec
+	
+	
+	randy = random.randint(1, 4)
+	if new == 1 : 			#you received a new frame of a new window
+		while(count != randy):
+			temp = random.randint(rec, lim)
+			
+			if temp not in receiver:
+				print "Received Frame -> ", temp
+				count+=1
+				flag = 1       #Atleast one new frame added in receiver buffer
+				receiver.append(temp)
+	else :
+		print "Received Frame -> ", rec       #you received a new frame of an old window  
+		receiver.append(rec)
+		flag = 1
+        if(flag == 1):
+		for i in range(rec,lim+1):
+			if i not in receiver:
+				ack = i
+				break
+			ack = i+1
+	
+	print "Sending ACK    -> ", ack #next expected frame
+        print '***************************************************'
+	data = str(ack)
+        conn.send(data.encode())  # send data to the client
+
+	if ack > win_end :
+		win_start = ack
+		win_end   = win_start + n - 1
+		new = 1			# now receive a new frame of a new window
+	else :
+		new = 0 		# now received a new frame of an old window
+
+    conn.close()  # close the connection
+
+
+if __name__ == '__main__':
+    server_program()
+
+############################# OUTPUT : Server Side ##########################
+Connection from:  ('127.0.0.1', 40912)
+Received Frame ->  0
+Received Frame ->  3
+Received Frame ->  2
+Received Frame ->  1
+Sending ACK    ->  4
+***************************************************
+Received Frame ->  6
+Received Frame ->  5
+Sending ACK    ->  4
+***************************************************
+Received Frame ->  4
+Sending ACK    ->  7
+***************************************************
+Received Frame ->  7
+Sending ACK    ->  8
+***************************************************
+Received Frame ->  9
+Received Frame ->  11
+Received Frame ->  8
+Received Frame ->  10
+Sending ACK    ->  12
+***************************************************
+sayali@sayali:~/Desktop/Saiy/MyDocs/CN $ '''
+Footer
+© 2023 GitH
+
+#### bellmanford 
+
+
+def bellman_ford(graph, start):
+    # Initialize the distances dictionary with start vertex having distance 0 and all other vertices having infinity distance.
+    distances = {vertex: float('infinity') for vertex in graph}
+    distances[start] = 0
+    
+    # Iterate over all edges V-1 times, where V is the number of vertices in the graph.
+    for _ in range(len(graph) - 1):
+        # For each edge (u, v) with weight w in the graph, update the distance to v if the distance to u plus w is smaller than the current distance to v.
+        for u in graph:
+            for v, w in graph[u].items():
+                if distances[u] + w < distances[v]:
+                    distances[v] = distances[u] + w
+    
+    # Check for negative-weight cycles.
+    for u in graph:
+        for v, w in graph[u].items():
+            if distances[u] + w < distances[v]:
+                raise ValueError("Negative weight cycle detected")
+    
+    return distances
+
+graph = {
+    'A': {'B': 3, 'C': 4, 'D': 2},
+    'B': {'A': 3, 'C': 5, 'E': 9},
+    'C': {'A': 4, 'B': 5, 'D': 1, 'E': 6},
+    'D': {'A': 2, 'C': 1, 'F': 8},
+    'E': {'B': 9, 'C': 6, 'F': 7},
+    'F': {'D': 8, 'E': 7}
+}
+
+print(bellman_ford(graph, 'A'))
+
 
 #Dijikstra
 
@@ -404,4 +702,163 @@ datagram, message = ip_reassembly(fragments)
 # Print the original message
 print('Received message:', message)
 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ go back n arq receiver @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@CHAT ROOM THINGY
+import time, socket, sys
+import random
 
+print("\nWelcome to Chat Room\n")
+print("Initialising....\n")
+time.sleep(1)
+
+s = socket.socket()
+shost = socket.gethostname()
+ip = socket.gethostbyname(shost)
+print(shost, "(", ip, ")\n")
+host = input(str("Enter server address: "))
+name = input(str("\nEnter your name: "))
+port = 1234
+print("\nTrying to connect to ", host, "(", port, ")\n")
+time.sleep(1)
+s.connect((host, port))
+print("Connected...\n")
+
+s.send(name.encode())
+s_name = s.recv(1024)
+s_name = s_name.decode()
+print(s_name, "has joined the chat room\nEnter [e] to exit chat room\n")
+
+while True:
+
+    m=s.recv(1024)
+    m=m.decode()
+    k=s.recv(1024)
+    k=k.decode()
+    k=int(k)
+    i=0
+    a=""
+    b=""
+    f=random.randint(0,1)
+    message=""
+    while i!=k:
+       
+       
+       f=random.randint(0,1)
+       if(f==0):
+          b="ACK Lost"
+          message = s.recv(1024)
+          message = message.decode()
+          s.send(b.encode())
+         
+       elif(f==1):
+          b="ACK "+str(i)
+          message = s.recv(1024)
+          message = message.decode()
+          
+          s.send(b.encode())
+          a=a+message
+          i=i+1
+          
+       
+    
+    print("The message received is :", m)
+    
+    @@@@@@@@@@@@@@@@SENDER@@@@@@@@@@@@@@@@
+    
+    # Sender.py
+import time, socket, sys
+
+def decimalToBinary(n):  
+    return n.replace("0b", "")
+
+def binarycode(s):
+    a_byte_array = bytearray(s, "utf8")
+
+    byte_list = []
+
+    for byte in a_byte_array:
+        binary_representation = bin(byte)
+        byte_list.append(decimalToBinary(binary_representation))
+
+    #print(byte_list)
+    a=""
+    for i in byte_list:
+        a=a+i
+    return a
+
+print("\nWelcome to Chat Room\n")
+print("Initialising....\n")
+time.sleep(1)
+
+s = socket.socket()
+host = socket.gethostname()
+ip = socket.gethostbyname(host)
+port = 1234
+s.bind((host, port))
+print(host, "(", ip, ")\n")
+name = input(str("Enter your name: "))
+           
+s.listen(1)
+print("\nWaiting for incoming connections...\n")
+conn, addr = s.accept()
+print("Received connection from ", addr[0], "(", addr[1], ")\n")
+
+s_name = conn.recv(1024)
+s_name = s_name.decode()
+print(s_name, "has connected to the chat room\nEnter [e] to exit chat room\n")
+conn.send(name.encode())
+
+while True:
+    message = input(str("Me : "))
+    conn.send(message.encode())
+    if message == "[e]":
+        message = "Left chat room!"
+        conn.send(message.encode())
+        print("\n")
+        break
+    message=binarycode(message)
+    f=str(len(message))
+    conn.send(f.encode())
+   
+    i=0
+    j=0
+    j=int(input("Enter the window size -> "))
+    
+   
+    b=""
+   
+    j=j-1
+    f=int(f)
+    k=j
+    while i!=f:
+        while(i!=(f-j)):
+            conn.send(message[i].encode())
+            b=conn.recv(1024)
+            b=b.decode()
+            print(b)
+            if(b!="ACK Lost"):
+                time.sleep(1)
+                print("Acknowledgement Received! The sliding window is in the range "+(str(i+1))+" to "+str(k+1)+" Now sending the next packet")
+                i=i+1
+                k=k+1
+                time.sleep(1)
+            else:
+                time.sleep(1)
+                print("Acknowledgement of the data bit is LOST! The sliding window remains in the range "+(str(i+1))+" to "+str(k+1)+" Now Resending the same packet")
+                time.sleep(1)
+        while(i!=f):
+            
+            conn.send(message[i].encode())
+            b=conn.recv(1024)
+            b=b.decode()
+            print(b)
+            if(b!="ACK Lost"):
+                time.sleep(1)
+                print("Acknowledgement Received! The sliding window is in the range "+(str(i+1))+" to "+str(k)+" Now sending the next packet")
+                i=i+1
+                time.sleep(1)
+            else:
+                time.sleep(1)
+                print("Acknowledgement of the data bit is LOST! The sliding window remains in the range "+(str(i+1))+" to "+str(k)+" Now Resending the same packet")
+                time.sleep(1)
+            
+            
