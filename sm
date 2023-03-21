@@ -227,3 +227,102 @@ graph = {
 
 print(bellman_ford(graph, 'A'))
 
+#ip fragmentation
+
+import sys
+
+def ip_fragmentation(data, mtu):
+    # Maximum IP packet size is 65535 bytes
+    max_size = 65535
+    
+    # Calculate the number of fragments needed
+    num_fragments = (len(data) // (mtu - 20)) + 1 if len(data) % (mtu - 20) != 0 else (len(data) // (mtu - 20))
+    
+    # Create an empty list to store the fragments
+    fragments = []
+    
+    # Generate a unique identifier for the IP packet
+    ip_id = 1234
+    
+    # Create the IP header
+    ip_header = b'\x45\x00\x00\x00'  # Version, header length, type of service
+    ip_header += (max_size).to_bytes(2, byteorder='big')  # Total length
+    ip_header += (ip_id).to_bytes(2, byteorder='big')  # Identification
+    ip_header += b'\x00\x00\x00\x00'  # Flags, fragment offset
+    ip_header += b'\x40\x00\x00\x00'  # Time-to-live, protocol
+    ip_header += b'\x00\x00'  # Header checksum
+    ip_header += b'\x00\x00\x00\x00'  # Source IP address
+    ip_header += b'\x00\x00\x00\x00'  # Destination IP address
+    
+    # Loop through the data and fragment it
+    for i in range(num_fragments):
+        # Calculate the offset for this fragment
+        offset = (i * (mtu - 20)) // 8
+        
+        # Create the IP header for this fragment
+        fragment_header = ip_header[:6]  # Version, header length, type of service
+        fragment_header += (mtu).to_bytes(2, byteorder='big')  # Total length
+        fragment_header += (ip_id).to_bytes(2, byteorder='big')  # Identification
+        fragment_header += (((i != num_fragments - 1) * 2**13) + offset).to_bytes(2, byteorder='big')  # Flags, fragment offset
+        fragment_header += ip_header[10:]  # Time-to-live, protocol, header checksum, source and destination IP addresses
+        
+        # Create the fragment by appending the header and the data
+        fragment = fragment_header + data[i * (mtu - 20):(i + 1) * (mtu - 20)]
+        
+        # Add the fragment to the list of fragments
+        fragments.append(fragment)
+    
+    # Return the list of fragments
+    return fragments
+
+def ip_reassembly(fragments):
+    # Create a dictionary to store the fragments
+    fragment_dict = {}
+    
+    # Loop through the fragments and store them in the dictionary
+    for fragment in fragments:
+        # Extract the identification and flags/offset fields from the IP header
+        ip_id = int.from_bytes(fragment[4:6], byteorder='big')
+        flags_offset = int.from_bytes(fragment[6:8], byteorder='big')
+        
+        # Extract the flags and fragment offset from the flags/offset field
+        flags = flags_offset & 0xE000
+        offset = flags_offset & 0x1FFF
+        
+        # If this is the first fragment, create a new entry in the dictionary
+        if flags == 0:
+            fragment_dict[ip_id] = [None] * ((offset + len(fragment) - 20) // 8 + 1)
+        
+        # Add the fragment to the list in the dictionary at the appropriate offset
+        fragment_dict[ip_id][offset // 8] = fragment[20:]
+    
+    # Combine the fragments into a single bytearray
+    datagram = bytearray()
+    for key, value in fragment_dict.items():
+        for fragment in value:
+            if fragment is not None:
+                datagram += fragment
+    
+    # Extract the original message from the datagram
+    message = datagram[20:]
+    
+    # Return the datagram and the message
+    return datagram, message
+
+
+# Fragment the message
+message = b'This is a test message to be fragmented into multiple IP packets.'
+mtu = 50
+fragments = ip_fragmentation(message, mtu)
+
+print(fragments)
+
+# Reassemble the fragments
+datagram, message = ip_reassembly(fragments);          
+
+# Print the results
+print('Datagram:', datagram.hex())
+print('Message:', message.decode())
+
+
+
